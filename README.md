@@ -1,5 +1,5 @@
-![Logo](https://github.com/arturreyes/enchiridion/blob/master/public/android-chrome-192x192.png?raw=true)
-# Psykip
+![Logo](https://github.com/ArturReyes/enchiridion/blob/main/public/android-chrome-192x192.png?raw=true)
+# Enchiridion
 
 We compiled translations from different authors at different points of history alongside the original Enchiridion to make sure you can read your favorite version of it.  
 
@@ -32,4 +32,4 @@ Between old and sometimes confusing terms, hard to find and even harder to downl
 - T.W. Rolleston Translation from [letsreadgreek.com](http://www.letsreadgreek.com/epictetus/rolleston.htm)
 - William Abbott Oldfather Translation from [en.wikisource.org](https://en.wikisource.org/wiki/Epictetus,_the_Discourses_as_reported_by_Arrian,_the_Manual,_and_Fragments/Manual)
 
-We took eight markdown files from [Tasuki's](https://enchiridion.tasuki.org/) website, then updated their metadata and divided them into 424 files for the individual chapters. Our versions of the files are available on [Github](https://github.com/bdsqqq/psykip/tree/master/src/data)
+We took eight markdown files from [Tasuki's](https://enchiridion.tasuki.org/) website, then updated their metadata and divided them into 424 files for the individual chapters. Our versions of the files are available on [Github](https://github.com/ArturReyes/enchiridion/tree/main/src/data)
