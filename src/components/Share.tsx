@@ -2,7 +2,7 @@ import { useState, useEffect} from "react";
 import { translatorNamesByCode } from "../data/codes";
 import type { TranslationCode } from "../data/codes";
 
-const appUrl = "https://psykip.vercel.app";
+const appUrl = "https://enchiridion-tau.vercel.app/";
 
 export default function Share({
   translationCode,

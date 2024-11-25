@@ -4,4 +4,4 @@ Disallow: /*.png$
 User-agent: *
 Allow: /
 
-Sitemap: https://enchiridion.vercel.app/sitemap-index.xml
+Sitemap: https://enchiridion-tau.vercel.app/sitemap-index.xml

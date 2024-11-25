@@ -15,7 +15,7 @@ export default defineConfig({
       external: ["svgo"]
     }
   },
-  site: "https://enchiridion.vercel.app",
+  site: "https://enchiridion-tau.vercel.app/",
   integrations: [astroImageTools, sitemap(), partytown(), tailwind(), react()],
   output: "hybrid",
   adapter: vercel()
