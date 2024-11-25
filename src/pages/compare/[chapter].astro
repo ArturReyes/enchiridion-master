@@ -1,0 +1,88 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/base.astro";
+import Chapter from "../../components/Chapter.astro";
+import type { Chapter as ChapterType } from "../../data/codes";
+import { Icon } from "astro-icon";
+import Nav from "../../components/Nav.astro";
+
+export function getStaticPaths() {
+  return Array(53)
+    .fill(0)
+    .map((_, i) => {
+      return {
+        params: {
+          chapter: (i + 1).toString(),
+        },
+      };
+    });
+}
+
+const { chapter } = Astro.params as unknown as {
+  chapter: ChapterType;
+};
+
+const chapters = await getCollection("translations", ({ data }) => {
+  return data.Chapter === parseInt(chapter);
+});
+---
+
+<Base
+  title={`Compare translations of the chapter ${chapter} of the Enchiridion — The manual, a compilation of the Enchiridion translations`}
+  description={`Compare translations of the chapter ${chapter} of the Enchiridion. We compiled translations from different authors at different points of history alongside the original Enchiridion from Epictetus to make sure you can easily read and share your favorite version of it.`}
+>
+  <Nav href="/#read" label="Full translations" />
+  <div class="flex flex-col px-12 py-16 justify-between min-h-screen gap-40">
+    <div
+      class="md:overflow-auto scrollbar-thin scrollbar-track-zinc-200 scrollbar-thumb-zinc-400 dark:scrollbar-track-zinc-900 dark:scrollbar-thumb-zinc-700 md:-mx-12 md:pb-6"
+    >
+      <div class="flex flex-col md:flex-row md:w-max gap-20 md:px-12">
+        {
+          chapters
+            .sort((a, b) => (a.data.Date < b.data.Date ? 1 : -1))
+            .map(async (chapter) => {
+              const { Content } = await chapter.render();
+              return (
+                <div class="flex flex-col gap-10 justify-between md:max-w-[80vw]">
+                  <Chapter
+                    colOnly={true}
+                    translationCode={chapter.data.Code}
+                    chapterNumber={chapter.data.Chapter}
+                    chapterHead={`${chapter.data.Chapter} — ${chapter.data.Translator}`}
+                    chapterHeadId={chapter.data.Code}
+                    chapterId={`${chapter.data.Code}-${chapter.data.Chapter}`}
+                  >
+                    <Content />
+                  </Chapter>
+                  <a
+                    href={`/read/${chapter.data.Code}#${chapter.data.Chapter}`}
+                    class="items-center p-2 -ml-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 focus:text-zinc-900 dark:focus:text-zinc-200 transition-colors underline underline-offset-2 outline-none focus-visible:ring-2 ring-zinc-500 ring-offset-zinc-100 dark:ring-offset-zinc-900 ring-offset-2 group select-none"
+                  >
+                    Continue reading in the full {chapter.data.Translator}
+                    translation
+                    <Icon
+                      class="inline h-[15px] w-[15px] transition-transform transform translate-y-[1px] group-focus-visible:translate-x-1 group-hover:translate-x-1"
+                      name="radix-icons:arrow-right"
+                    />
+                  </a>
+                </div>
+              );
+            })
+        }
+      </div>
+    </div>
+
+    <footer class="flex justify-end">
+      <div class="w-max">
+        <a
+          class="flex gap-1 items-center p-2 -ml-2 -mt-2 w-max underline underline-offset-2 outline-none focus-visible:ring-2 ring-zinc-500 ring-offset-zinc-100 dark:ring-offset-zinc-900 ring-offset-2 group"
+          href="/about/translations"
+          >See translations sources <Icon
+            class="inline h-[15px] w-[15px] transition-transform transform translate-y-[1px] group-focus-visible:translate-x-1 group-hover:translate-x-1"
+            name="radix-icons:arrow-right"
+          />
+        </a>
+      </div>
+    </footer>
+  </div>
+</Base>

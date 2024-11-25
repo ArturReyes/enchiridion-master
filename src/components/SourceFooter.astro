@@ -1,0 +1,18 @@
+---
+import ExternalLink from "./ExternalLink.astro";
+
+export interface Props {
+  url: string;
+  label: string;
+}
+
+const { url, label } = Astro.props;
+---
+
+<footer class="flex justify-end">
+  <div class="w-max">
+    The source of this translation is <ExternalLink url={url}
+      >{label}
+    </ExternalLink>
+  </div>
+</footer>

@@ -1,0 +1,179 @@
+---
+import { getCollection } from "astro:content";
+import type { TranslationCode } from "../../data/codes";
+import { Icon } from "astro-icon";
+import Base from "../../layouts/base.astro";
+import codes from "../../data/codes";
+import Chapter from "../../components/Chapter.astro";
+import SourceFooter from "../../components/SourceFooter.astro";
+import Nav from "../../components/Nav.astro";
+
+export function getStaticPaths() {
+  return codes.map((code) => ({
+    params: {
+      translation: code,
+    },
+  }));
+}
+
+const { translation } = Astro.params as {
+  translation: TranslationCode;
+};
+
+const MDs = await getCollection("translations", ({ data }) => {
+  return data.Code === translation;
+}).then((MDs) => MDs.sort((a, b) => a.data.Chapter - b.data.Chapter));
+---
+
+<Base
+  title={`${MDs[0].data.Translator}'s translation — The manual, a compilation of the Enchiridion translations`}
+  description={`Read ${MDs[0].data.Translator}'s Translation of the Enchiridion. We compiled translations from different authors at different points of history alongside the original Enchiridion from Epictetus to make sure you can easily read and share your favorite version of it.`}
+>
+  <Nav href="/" label="Home" />
+  <div
+    id="continueToolbar"
+    class="hidden absolute transition-opacity opacity-0 w-fit gap-4 justify-between md:justify-start lg:flex-col lg:gap-2 px-8 md:px-12 py-6 mx-auto"
+  >
+    <a
+      class="w-max text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 focus:text-zinc-900 dark:focus:text-zinc-200 transition-all duration-200 underline-offset-2 outline-none focus-visible:ring-2 ring-zinc-500 ring-offset-zinc-100 dark:ring-offset-zinc-900 ring-offset-2 underline group"
+      id="continueCTA"
+    >
+      <span id="continueCTALabel"></span>
+      <Icon
+        class="inline h-[15px] w-[15px] transition-transform transform -translate-y-[1px] group-focus-visible:translate-y-[2px] group-hover:translate-y-[2px]"
+        name="radix-icons:arrow-down"
+      />
+    </a>
+    <button
+      class="block w-max text-end text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 focus:text-zinc-900 dark:focus:text-zinc-200 transition-all duration-200 underline-offset-2 underline outline-none focus-visible:ring-2 ring-zinc-500 ring-offset-zinc-100 dark:ring-offset-zinc-900 ring-offset-2 justify-self-end"
+      id="eraseProgressCTA"
+      onclick="eraseProgress()">Clear progress</button
+    >
+  </div>
+  <div class="flex flex-col gap-40 px-8 md:px-12 py-16">
+    <div class="flex flex-col gap-24 mx-auto">
+      {
+        MDs.map(async (MD, i) => {
+          const { Content } = await MD.render()
+          return (
+          <div data-translation={translation} data-chapter={i + 1}>
+            <Chapter
+              translationCode={translation}
+              chapterNumber={MD.data.Chapter}
+              chapterHead={MD.data.Chapter}
+              chapterHeadId={MD.data.Chapter}
+              chapterId={`${translation}-${MD.data.Chapter}`}
+            >
+              <Content />
+            </Chapter>
+          </div>
+        )
+        })
+      }
+    </div>
+
+    <SourceFooter
+      url={MDs[0].data.Source.url}
+      label={MDs[0].data.Source.label}
+    />
+  </div>
+</Base>
+<script>
+  const translation = window.location.href
+    .split("/")
+    .slice(-1)[0]
+    .split("#")[0];
+  let readUpTo = localStorage.getItem(translation);
+
+  if (readUpTo) {
+    const continueToolbar = document.querySelector("#continueToolbar");
+    if (continueToolbar) {
+      continueToolbar.classList.remove("hidden");
+      continueToolbar.classList.add("flex");
+      continueToolbar.classList.remove("opacity-0");
+      continueToolbar.classList.add("opacity-100");
+    } else {
+      console.log("couldn't find #continueToolbar");
+    }
+
+    const continueCTA = document.querySelector<HTMLAnchorElement>("#continueCTA");
+    if (continueCTA) {
+      continueCTA.href = `#${readUpTo}`;
+    } else {
+      console.log("couldn't find #continueCTA");
+    }
+
+    const continueCTALabel = document.querySelector<HTMLSpanElement>("#continueCTALabel");
+    if (continueCTALabel) {
+      continueCTALabel.innerText = `Continue from chapter ${readUpTo}`;
+    } else {
+      console.log("couldn't find #continueCTALabel");
+    }
+
+    const eraseProgressCTA = document.querySelector("#eraseProgressCTA");
+    if (eraseProgressCTA) {
+      eraseProgressCTA.classList.remove("hidden");
+      eraseProgressCTA.classList.add("flex");
+    } else {
+      console.log("couldn't find #eraseProgressCTA");
+    }
+  }
+
+  function eraseProgress() {
+    const continueCTA = document.querySelector("#continueCTA");
+    const eraseProgressCTA = document.querySelector("#eraseProgressCTA");
+
+    if (!!readUpTo && !!eraseProgressCTA && !!continueCTA) {
+      localStorage.removeItem(translation);
+      readUpTo = "0";
+
+      continueCTA.classList.remove("opacity-100");
+      continueCTA.classList.add("opacity-0");
+      continueCTA.classList.add("translate-x-2");
+
+      eraseProgressCTA.textContent = "Done!";
+      eraseProgressCTA.classList.add("pointer-events-none");
+      eraseProgressCTA.classList.remove("underline");
+
+      setTimeout(() => {
+        // After progress indicatos fade out
+        continueCTA.classList.add("pointer-events-none");
+      }, 150);
+
+      setTimeout(() => {
+        eraseProgressCTA.classList.add("opacity-0");
+        eraseProgressCTA.classList.add("translate-x-4");
+      }, 1000);
+
+      setTimeout(() => {
+        // After eraseButton fade out
+        continueCTA.classList.remove("flex");
+        continueCTA.classList.add("hidden");
+      }, 1150);
+    }
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const intersecting = entry.isIntersecting;
+        if (intersecting) {
+          const chapter =
+            entry.target.attributes.getNamedItem("data-chapter")?.value;
+          if (!!chapter) {
+            if (!readUpTo || parseInt(chapter) > parseInt(readUpTo)) {
+              localStorage.setItem(translation, chapter);
+              readUpTo = localStorage.getItem(translation);
+            }
+          }
+        }
+      });
+    },
+    { threshold: 0, rootMargin: "0px 0px -100%" }
+  );
+
+  const Chapters = document.querySelectorAll("div[data-chapter]");
+  Chapters.forEach((chapter) => {
+    observer.observe(chapter);
+  });
+</script>
